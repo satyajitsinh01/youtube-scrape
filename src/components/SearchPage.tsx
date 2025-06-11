@@ -3,7 +3,6 @@ import {
     Container,
     TextField,
     Button,
-    Grid,
     Card,
     CardContent,
     CardMedia,
@@ -16,13 +15,16 @@ import {
     InputAdornment,
     IconButton,
     Tooltip,
-    Divider
+    Grid,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
 import axios from 'axios';
+
+// Get API base URL from environment variables
+const API_URL = "https://youtube-content-discovery-tool-be.onrender.com";
 
 export default function SearchPage() {
     const [query, setQuery] = useState('');
@@ -54,7 +56,8 @@ export default function SearchPage() {
         }
 
         try {
-            const API_BASE_URL = 'http://localhost:8002';
+
+            console.log("APIBASE", API_URL)
             const response = await axios.post<{
                 results: Array<{
                     title: string;
@@ -65,7 +68,7 @@ export default function SearchPage() {
                     country?: string;
                 }>;
                 related_keywords: string[];
-            }>(`${API_BASE_URL}/search`, {
+            }>(`${API_URL}/search`, {
                 query: query.trim(),
                 // Only include filters if they have non-zero/non-empty values
                 ...(filters.min_views > 0 && { min_views: filters.min_views }),
@@ -167,7 +170,7 @@ export default function SearchPage() {
                         }}
                     >
                         <Grid container spacing={4}>
-                            <Grid item xs={8}>
+                            <Grid {...{ xs: 8 }}>
                                 <TextField
                                     fullWidth
                                     label="Search Query"
@@ -185,7 +188,7 @@ export default function SearchPage() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
+                            <Grid {...{ xs: 12, sm: 4 }}>
                                 <TextField
                                     fullWidth
                                     type="number"
@@ -207,7 +210,7 @@ export default function SearchPage() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
+                            <Grid {...{ xs: 12, sm: 4 }}>
                                 <TextField
                                     fullWidth
                                     type="number"
@@ -229,7 +232,7 @@ export default function SearchPage() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
+                            <Grid {...{ xs: 12, sm: 4 }}>
                                 <TextField
                                     fullWidth
                                     label="Country Code"
@@ -251,7 +254,7 @@ export default function SearchPage() {
                                 />
                             </Grid>
 
-                            <Grid item xs={12}>
+                            <Grid {...{ xs: 12 }}>
                                 <Button
                                     fullWidth
                                     variant="contained"
@@ -305,7 +308,7 @@ export default function SearchPage() {
                 {videos.length > 0 && (
                     <Grid container spacing={3} justifyContent="center">
                         {videos.map((video) => (
-                            <Grid item xs={12} sm={6} md={4} key={video.id} sx={{ display: 'flex' }}>
+                            <Grid {...{ xs: 12, sm: 6, md: 4, key: video.id, sx: { display: 'flex' } }}>
                                 <Card
                                     sx={{
                                         display: 'flex',
