@@ -208,7 +208,9 @@ export default function SearchPage() {
         };
 
         const columnWidths: { [key: string]: number } = {
-            title: 900,
+            title: 200,
+            email: 200,
+            contact_links: 400,
             description: 400,
             tags: 250,
             channel_name: 200,
@@ -232,7 +234,7 @@ export default function SearchPage() {
 
         // Column ordering for better display
         const priorityFields = [
-            'id', 'title', 'thumbnail', 'channel_name', 'subscriber_count', 'view_count', 
+            'id', 'title', "email", "contact_links", "thumbnail", 'channel_name', 'subscriber_count', 'view_count', 
             'like_count', 'comment_count', 'category_id', 'published_at', 'duration', 
             'country', 'definition', 'caption_available', 'licensed_content', 'tags', 'description', 
             'link'
@@ -255,7 +257,7 @@ export default function SearchPage() {
                 field: key,
                 headerName: formatColumnHeader(key),
                 width: columnWidths[key] || 150,
-                flex: key === 'title' ? 1 : undefined,
+                // flex: key === 'title' ? 1 : undefined,
                 filterable: true,
                 sortable: true,
                 // Prefer renderCell over valueFormatter for more control
