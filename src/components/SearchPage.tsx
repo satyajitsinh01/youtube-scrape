@@ -116,7 +116,7 @@ const extractDataFromResponse = (items: any[]): any[] => {
         });
         
         // Add thumbnail
-        result.thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : 'N/A';
+        // result.thumbnail = videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : 'N/A';
         
         // Process channel_info separately
         if (item.channel_info && typeof item.channel_info === 'object') {
