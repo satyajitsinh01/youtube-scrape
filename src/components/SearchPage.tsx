@@ -96,7 +96,7 @@ const formatCellValue = (value: any): string => {
 const extractDataFromResponse = (items: any[]): any[] => {
     return items.map((item, index) => {
         // Extract video ID for thumbnail
-        const videoId = item.link ? item.link.split('v=')[1]?.split('&')[0] : '';
+        // const videoId = item.link ? item.link.split('v=')[1]?.split('&')[0] : '';
         
         // Create a copy of the item to avoid modifying the original
         const result: any = { id: index };
