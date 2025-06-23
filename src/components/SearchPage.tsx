@@ -33,7 +33,7 @@ import axios from 'axios';
 
 // Get API base URL from environment variables
 const API_URL = "https://youtube-content-discovery-tool-be.onrender.com";
-// const API_URL = "http://localhost:8002";
+// const API_URL = "http://localhost:8000";
 
 // Helper function to format column header
 const formatColumnHeader = (key: string): string => {
@@ -168,19 +168,19 @@ export default function SearchPage() {
                     style={{ width: '160px', height: '90px', objectFit: 'cover' }}
                 />
             ),
-            link: (params: GridRenderCellParams) => (
-                <Button
-                    href={params.value as string}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="contained"
-                    size="small"
-                    startIcon={<YouTubeIcon />}
-                    sx={{ '&:hover': { color: 'white' } }}
-                >
-                    Watch
-                </Button>
-            ),
+            // link: (params: GridRenderCellParams) => (
+            //     <Button
+            //         href={params.value as string}
+            //         target="_blank"
+            //         rel="noopener noreferrer"
+            //         variant="contained"
+            //         size="small"
+            //         startIcon={<YouTubeIcon />}
+            //         sx={{ '&:hover': { color: 'white' } }}
+            //     >
+            //         Watch
+            //     </Button>
+            // ),
             caption_available: (params: GridRenderCellParams) => {
                 // Special handler for caption_available
                 return typeof params.value === 'boolean' 
@@ -296,15 +296,15 @@ export default function SearchPage() {
                 };
             }
             
-            if (key === 'link') {
-                return {
-                    ...baseColumn,
-                    headerName: 'Watch',
-                    renderCell: specialColumnRenders.link,
-                    sortable: false,
-                    filterable: false,
-                };
-            }
+            // if (key === 'link') {
+            //     return {
+            //         ...baseColumn,
+            //         headerName: 'Watch',
+            //         renderCell: specialColumnRenders.link,
+            //         sortable: false,
+            //         filterable: false,
+            //     };
+            // }
 
             // Handle numeric fields
             if ([
