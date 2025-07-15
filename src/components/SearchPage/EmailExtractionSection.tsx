@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { Box, Button, Typography, Paper, Chip } from '@mui/material';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-import type { VideoData } from '../../types';
+import type { YouTubeChannel } from './GridTable';
 
 interface EmailExtractionSectionProps {
-  selectedRows: VideoData[];
+  selectedRows: YouTubeChannel[];
   extractingEmails: boolean;
   showEmails: boolean;
   onExtractEmails: () => void;
@@ -19,7 +19,7 @@ export default function EmailExtractionSection({
   // Helper to extract unique emails from selected rows
   const extractedEmails = useMemo(() => {
     const emails = selectedRows
-      ?.map((row) => row?.email)
+      ?.flatMap((row) => row?.emails || [])
       ?.filter(
         (email) => email && typeof email === "string" && email?.trim() !== ""
       );

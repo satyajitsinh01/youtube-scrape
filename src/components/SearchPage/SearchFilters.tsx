@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,16 +12,23 @@ import {
   MenuItem,
   TextField,
   Chip,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import YouTubeIcon from '@mui/icons-material/YouTube';
-import PersonIcon from '@mui/icons-material/Person';
-import PublicIcon from '@mui/icons-material/Public';
-import VideoLibrary from '@mui/icons-material/VideoLibrary';
-import CloseIcon from '@mui/icons-material/Close';
-import { StyledPaper, StyledTextField, StyledSelect } from '../common/StyledComponents';
-import { countries } from '../../constants/countries.const';
-import type { SearchFilters as SearchFiltersType, CountryType } from '../../types';
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import PersonIcon from "@mui/icons-material/Person";
+import PublicIcon from "@mui/icons-material/Public";
+import VideoLibrary from "@mui/icons-material/VideoLibrary";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  StyledPaper,
+  StyledTextField,
+  StyledSelect,
+} from "../common/StyledComponents";
+import { countries } from "../../constants/countries.const";
+import type {
+  SearchFilters as SearchFiltersType,
+  CountryType,
+} from "../../types";
 
 interface SearchFiltersProps {
   query: string;
@@ -387,8 +394,7 @@ export default function SearchFilters({
                           height: 24,
                           ml: 1,
                           "&:hover": {
-                            backgroundColor: (theme) =>
-                              theme.palette.grey[100],
+                            backgroundColor: (theme) => theme.palette.grey[100],
                             color: "red",
                           },
                         }}
@@ -513,9 +519,21 @@ export default function SearchFilters({
               borderRadius: 2,
               textTransform: "none",
               boxShadow: 3,
+              outline: "none !important",
+              "&:focus": {
+                outline: "none !important",
+                boxShadow: "none !important",
+              },
+              "&:focus-visible": {
+                outline: "none !important",
+                boxShadow: "none !important",
+              },
+              "&:active": {
+                outline: "none !important",
+                boxShadow: "none !important",
+              },
               "&:hover": {
-                backgroundColor: (theme) =>
-                  theme.palette.primary.main + "E6",
+                backgroundColor: (theme) => theme.palette.primary.main + "E6",
                 boxShadow: 6,
                 transform: "translateY(-1px)",
               },
@@ -535,4 +553,4 @@ export default function SearchFilters({
       </Box>
     </StyledPaper>
   );
-} 
+}

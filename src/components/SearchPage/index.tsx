@@ -4,34 +4,27 @@ import axios from "axios";
 import SearchHeader from "./SearchHeader";
 import SearchFilters from "./SearchFilters";
 import RelatedTermsPanel from "./RelatedTermsPanel";
-import VideoResultsTable from "./VideoResultsTable";
 import EmailExtractionSection from "./EmailExtractionSection";
 import { extractDataFromResponse } from "../../utils/common";
 import { API_URL } from "../../constants/api.const";
-import type { 
-  VideoData, 
-  SearchFilters as SearchFiltersType, 
-  GridFilterModel, 
-  GridSortModel 
-} from "../../types";
+import type { SearchFilters as SearchFiltersType, EmailExtractionResponse } from "../../types";
+import GridTable, { type YouTubeChannel } from "./GridTable";
+
+// Add this type above the component if not present in types
+interface SearchRequestPayload extends SearchFiltersType {
+  query: string;
+}
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<SearchFiltersType>({
     limit: 10,
   });
-  const [videos, setVideos] = useState<VideoData[]>([]);
+  const [videos, setVideos] = useState<YouTubeChannel[]>([]);
   const [relatedTerms, setRelatedTerms] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [filterModel, setFilterModel] = useState<GridFilterModel>({
-    items: [],
-    quickFilterValues: [],
-  });
-  const [sortModel, setSortModel] = useState<GridSortModel>([]);
-  const [selectedRows, setSelectedRows] = useState<VideoData[]>([]);
+  const [selectedRows, setSelectedRows] = useState<YouTubeChannel[]>([]);
   const [extractingEmails, setExtractingEmails] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -41,8 +34,6 @@ export default function SearchPage() {
     setRelatedTerms([]);
     setLoading(true);
     setError("");
-    setFilterModel({ items: [], quickFilterValues: [] });
-    setSortModel([]);
 
     if (!query.trim()) {
       setError("Please enter a search query");
@@ -56,19 +47,19 @@ export default function SearchPage() {
     }
 
     try {
-      const payload: Record<string, any> = {
+      const payload: SearchRequestPayload = {
         query: query.trim(),
         ...filters,
         limit: Number(filters.limit),
       };
-      const numericKeys = ["min_views", "min_subscribers"];
-      numericKeys.forEach((key) => {
-        const value = payload[key];
-        if (value !== undefined && value !== null && !isNaN(value)) {
-          payload[key] = Number(value);
-        }
-      });
-      
+      // Explicitly convert numeric fields if present
+      if (typeof payload.min_views === 'string') {
+        payload.min_views = Number(payload.min_views);
+      }
+      if (typeof payload.min_subscribers === 'string') {
+        payload.min_subscribers = Number(payload.min_subscribers);
+      }
+
       const response = await axios.post(`${API_URL}/search`, payload);
 
       if (!response.data) {
@@ -97,12 +88,13 @@ export default function SearchPage() {
       if (response.data.related_keywords) {
         setRelatedTerms(response.data.related_keywords);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setVideos([]);
       setRelatedTerms([]);
       setError(
-        err.response?.data?.detail ||
-          err.message ||
+        (err as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail ||
+          (err as Error).message ||
           "Failed to fetch results. Please try again."
       );
       console.error("Search error:", err);
@@ -128,16 +120,16 @@ export default function SearchPage() {
 
       const payload = { video_urls };
       const response = await axios.post(`${API_URL}/extract-emails`, payload);
-      const emailResults = response.data;
+      const emailResults: EmailExtractionResponse[] = response.data;
 
       // Handle FastAPI validation errors
       if (
         Array.isArray(emailResults) &&
         emailResults.length > 0 &&
-        emailResults[0]?.msg &&
-        emailResults[0]?.loc
+        typeof emailResults[0].error === 'string' &&
+        emailResults[0].error
       ) {
-        setError("Invalid input for email extraction.");
+        setError("Invalid input for email extraction: " + emailResults[0].error);
         setExtractingEmails(false);
         return;
       }
@@ -146,12 +138,12 @@ export default function SearchPage() {
       setVideos((prevVideos) =>
         prevVideos.map((video) => {
           const match = emailResults.find(
-            (res: any) => res.video_url?.id === video?.id
+            (res: EmailExtractionResponse) => res.video_url?.id === video?.id
           );
           if (match) {
             return {
               ...video,
-              primary_email: match?.email || video?.email,
+              primary_email: match?.email || video?.emails,
               links: match?.links || video?.links,
             };
           }
@@ -160,22 +152,23 @@ export default function SearchPage() {
       );
 
       // Update selected rows
-      setSelectedRows((prevSelected: VideoData[]) =>
+      setSelectedRows((prevSelected: YouTubeChannel[]) =>
         prevSelected.map((row) => {
           const match = emailResults.find(
-            (res: any) => res.video_url?.url === row.channel_url
+            (res: EmailExtractionResponse) => res.video_url?.url === row.channel_url
           );
           if (match) {
             return {
               ...row,
-              email: match.email || row.email,
+              primary_email: match.email || row.emails,
               links: match.links || row.links,
             };
           }
           return row;
         })
       );
-    } catch (error: any) {
+    } catch (errors: unknown) {
+      console.error(errors);
       setError("Failed to extract emails. Please try again.");
     } finally {
       setExtractingEmails(false);
@@ -229,14 +222,26 @@ export default function SearchPage() {
             onFiltersChange={setFilters}
             onSearch={handleSearch}
           />
-          <RelatedTermsPanel terms={relatedTerms} onTermClick={handleTermClick} />
+          <RelatedTermsPanel
+            terms={relatedTerms}
+            onTermClick={handleTermClick}
+          />
         </Box>
 
         {/* Error Message */}
         {error && (
           <Alert
             severity="error"
-            sx={{ mb: 1, mt: 4, width: "100%", maxWidth: "800px" }}
+            sx={{
+              mb: 1,
+              mt: 4,
+              width: "100%",
+              maxWidth: "800px",
+              wordBreak: "break-word",
+              whiteSpace: "pre-line",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           >
             {error}
           </Alert>
@@ -244,26 +249,20 @@ export default function SearchPage() {
 
         {/* Video Results Table */}
         {videos.length > 0 && (
-          <VideoResultsTable
-            videos={videos}
-            loading={loading}
-            selectedRows={selectedRows}
-            onRowSelectionChange={(rows) => setSelectedRows(rows)}
-            onExtractEmails={handleExtractEmails}
-            extractingEmails={extractingEmails}
-            page={page}
-            pageSize={pageSize}
-            filterModel={filterModel}
-            sortModel={sortModel}
-            onPaginationModelChange={(model) => {
-              setPage(model.page);
-              setPageSize(model.pageSize);
-            }}
-            onFilterModelChange={(model) => setFilterModel(model)}
-            onSortModelChange={(model) => setSortModel(model)}
-          />
+          <Box sx={{ width: "100%", overflowX: "auto" }}>
+            <GridTable
+              data={videos || []}
+              onRowSelectionChange={(rows: YouTubeChannel[]) => {
+                if (
+                  rows.length !== selectedRows.length ||
+                  rows.some((row, i) => row.id !== selectedRows[i]?.id)
+                ) {
+                  setSelectedRows(rows);
+                }
+              }}
+            />
+          </Box>
         )}
-
         {/* Email Extraction Section */}
         <EmailExtractionSection
           selectedRows={selectedRows}
@@ -271,7 +270,6 @@ export default function SearchPage() {
           showEmails={false}
           onExtractEmails={handleExtractEmails}
         />
-
       </Box>
     </Box>
   );
